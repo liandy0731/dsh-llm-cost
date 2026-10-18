@@ -41,7 +41,12 @@ window.__ModuleLoader__.load({
       tag.textContent = [
         '.llmcost_root{min-width:0;display:inline-flex;align-self:center;flex:0 0 auto}',
         '.llmcost_inline{order:1}',
-        '[data-turn-tail] [class*="_timeEnd"]{order:2}',
+        // The running DSH wraps the usage pill and the clock in one inline-flex
+        // span, so a slot entry can only land before or after that pair. Flatten
+        // the wrapper into the action row's flex context, then order ourselves
+        // between the usage pill and the clock.
+        '[data-turn-tail] [class*="endInfo"]{display:contents}',
+        '[data-turn-tail] [class*="timeEnd"]{order:2}',
         '.llmcost_trigger{min-width:0;height:calc(28px + var(--dsh-content-font-delta,0px));padding:6px 8px;display:inline-flex;align-items:center;gap:4px;border:none;border-radius:28px;background:0 0;color:var(--dsw-alias-label-tertiary);font:inherit;font-size:var(--dsh-content-font-size-secondary,13px);line-height:calc(24px + var(--dsh-content-font-delta,0px));font-variant-numeric:tabular-nums;white-space:nowrap;cursor:pointer}',
         '.llmcost_trigger:hover,.llmcost_trigger[aria-expanded=true]{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary)}',
         '.llmcost_trigger:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}',

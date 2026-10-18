@@ -1,6 +1,6 @@
 {
   "name": "dsh-llm-cost",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Per-turn and whole-session LLM cost meter for DeepSeek Harness (DeepSeek / GLM official prices, peak and off-peak tariffs, Chinese statutory holidays).",
   "type": "module",
   "license": "MIT",
