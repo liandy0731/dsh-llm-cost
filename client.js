@@ -244,10 +244,47 @@ window.__ModuleLoader__.load({
       return { total, entries };
     }
 
-    /** One Turn's breakdown from the Chat layer's exact `TurnTokenUsage`. */
-    function turnBreakdown(owner) {
-      const turn = owner?.turn;
-      const data = typeof turn?.data?.get === 'function' ? turn.data.get('turn-tail') : undefined;
+    /** One Turn's `turn-tail` data (token usage, time, closing provenance) by assistant message id. */
+    function turnTailDataOf(snapshot, messageId) {
+      const nodes = snapshot?.nodes;
+      const locations = snapshot?.locations;
+      if (nodes === undefined || locations === undefined) return null;
+      let turn = null;
+      let values;
+      try {
+        values = nodes.values();
+      } catch {
+        return null;
+      }
+      for (const node of values) {
+        if (node?.kind !== 'assistant') continue;
+        if (node.data?.finalNode?.messageId === messageId) {
+          turn = node.data.turn;
+          break;
+        }
+      }
+      if (turn === null) return null;
+      let keys;
+      try {
+        keys = locations.getTurn(turn);
+      } catch {
+        return null;
+      }
+      if (!Array.isArray(keys)) return null;
+      for (const key of keys) {
+        let node;
+        try {
+          node = nodes.get(key);
+        } catch {
+          node = undefined;
+        }
+        if (node?.kind === 'turn-tail' && node.data?.tokenUsage !== undefined) return node.data;
+      }
+      return null;
+    }
+
+    /** Money + detail for one Turn, from its `turn-tail` data. */
+    function turnEntryOf(data) {
       const usage = data?.tokenUsage;
       if (usage === undefined || usage === null) return null;
       const provenance = data.closing?.finalNode?.provenance;
@@ -259,8 +296,16 @@ window.__ModuleLoader__.load({
       const tariff = tariffAt(data.time);
       const price = priceOf(route);
       const buckets = bucketList(usage);
-      const cost = tariffCost(price[tariff], buckets);
-      return { total: Math.round(cost * 1e6) / 1e6, route, tariff, price, buckets };
+      const total = Math.round(tariffCost(price[tariff], buckets) * 1e6) / 1e6;
+      return {
+        total,
+        route,
+        price,
+        peakBuckets: tariff === 'peak' ? buckets : null,
+        offPeakBuckets: tariff === 'offPeak' ? buckets : null,
+        peakCost: tariff === 'peak' ? total : 0,
+        offPeakCost: tariff === 'offPeak' ? total : 0,
+      };
     }
 
     /* ---------- anchored dialog seat (same behaviour as the shipped stat dialog) ---------- */
@@ -421,24 +466,17 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** One completed Turn's cost chip in its footer row. */
-    function TurnCost({ matched, t }) {
+    /** One Turn's cost chip, inline in the finalized-assistant action row (next to the usage pill). */
+    function TurnCostAction({ messageId, useChat, t }) {
+      const data = useChat((snapshot) => turnTailDataOf(snapshot, messageId));
       const { open, setOpen, rootRef, panelRef, pos } = useAnchoredDialog();
-      if (matched === null || matched === undefined) return null;
-
-      const entry = {
-        route: matched.route,
-        price: matched.price,
-        peakBuckets: matched.tariff === 'peak' ? matched.buckets : null,
-        offPeakBuckets: matched.tariff === 'offPeak' ? matched.buckets : null,
-        peakCost: matched.tariff === 'peak' ? matched.total : 0,
-        offPeakCost: matched.tariff === 'offPeak' ? matched.total : 0,
-      };
+      const entry = React.useMemo(() => turnEntryOf(data), [data]);
+      if (entry === null) return null;
 
       const panel = h(DialogPanel, {
         label: t('dialogTurn'),
         title: t('dialogTurn'),
-        total: matched.total,
+        total: entry.total,
         rows: detailRows(entry, t),
         note: t('note'),
         panelRef,
@@ -451,7 +489,7 @@ window.__ModuleLoader__.load({
           open,
           onToggle: () => setOpen((value) => !value),
           mathLabel: 'chipTurn',
-          amount: matched.total,
+          amount: entry.total,
           t,
         }),
         open && (createPortal !== null ? createPortal(panel, document.body) : panel),
@@ -505,13 +543,12 @@ window.__ModuleLoader__.load({
           order: 5,
           locale: NS,
         }, SessionCost));
-        ctx.slots.inject('conversation.chat.turnTail', () => ctx.slots.register({
-          name: 'conversation.chat.turnTail',
+        ctx.slots.inject('conversation.chat.assistant-actions', () => ctx.slots.register({
+          name: 'conversation.chat.assistant-actions',
           id: 'llm-cost-turn',
-          order: 10,
+          order: 20,
           locale: NS,
-          select: turnBreakdown,
-        }, TurnCost));
+        }, TurnCostAction));
       },
     };
   },

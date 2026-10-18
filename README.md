@@ -1,13 +1,13 @@
 # dsh-llm-cost
 
-给 [DeepSeek Harness](https://github.com/deepseek-ai) 用的**费用计**：在输入框下方显示本次会话的累计花费，在每轮对话底部显示该轮花费，点一下弹出明细。
+给 [DeepSeek Harness](https://github.com/deepseek-ai) 用的**费用计**：在输入框下方显示本次会话的累计花费，在每轮操作行里（token 用量旁边）显示该轮花费，点一下弹出明细。
 
 数字按各模型**官网公开单价 × token 数**本地估算，不是账单。
 
 ## 功能
 
 - **累计**：输入框下方原有统计行末尾新增一个「累计 ¥x.xxxx」，覆盖整个会话（跨轮次、跨模型、跨高峰/空闲时段），长会话翻页也不漏算。
-- **本轮**：每轮对话 footer 新增「本轮 ¥x.xxxx」，只算这一轮。
+- **本轮**：每轮对话操作行里、token 用量「用量 xxx tok」旁边新增「本轮 ¥x.xxxx」，只算这一轮。
 - **明细弹窗**：与 token 用量弹窗同一套观感——贴着触发点向上弹出、`dl` 明细行、点外面或 Esc 关闭。内容包含模型、时段（高峰/空闲）、该时段单价、输入（未命中）/ 缓存命中 / 输出 各自的 token 数 + 金额、合计。
 - 金额保留 4 位小数。
 
@@ -80,7 +80,7 @@ const deepseekFlash = {
 ## 实现
 
 - 宿主半边注册一个会话投影 `llmCostTokens`：按 `provider/model` 路由把整条日志的 token 折成「高峰 / 空闲」两组桶，客户端因此能拿到整个会话的精确拆分，不受聊天窗口分页影响。
-- 客户端半边是两个只读 slot 贡献：`conversation.composer.dock`（累计）与 `conversation.chat.turnTail`（本轮）；本轮金额取自 Chat 层已有的 `TurnTokenUsage`。
+- 客户端半边是两个只读 slot 贡献：`conversation.composer.dock`（累计）与 `conversation.chat.assistant-actions`（本轮，挂在最终 assistant 消息的操作行里，所以和 token 用量并列）；本轮金额取自 Chat 层已有的 `TurnTokenUsage`。
 - 不修改 DSH 本体，不写会话日志，不订阅模型请求。
 
 ## 开发

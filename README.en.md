@@ -1,13 +1,13 @@
 # dsh-llm-cost
 
-A cost meter for [DeepSeek Harness](https://github.com/deepseek-ai): shows the accumulated cost of the current session below the composer and the cost of each turn in its footer. Click either chip for a breakdown.
+A cost meter for [DeepSeek Harness](https://github.com/deepseek-ai): shows the accumulated cost of the current session below the composer and the cost of each turn in its action row, next to the token-usage pill. Click either chip for a breakdown.
 
 All numbers are local estimates: **official model prices × token counts**, not a bill.
 
 ## Features
 
 - **Session total** — `累计 ¥x.xxxx` appended to the existing stats row below the composer; it covers the whole session (all turns, all models, both tariffs) and is unaffected by Chat window paging.
-- **Turn total** — `本轮 ¥x.xxxx` in each completed turn's footer, for that turn only.
+- **Turn total** — `本轮 ¥x.xxxx` in each turn's action row, next to the token-usage pill, for that turn only.
 - **Breakdown dialog** — same look as the shipped token-usage dialog (anchored above the trigger, `dl` rows, outside-click / Escape to dismiss): model, tariff (peak / off-peak), unit prices, and token counts plus money for input (cache miss), cache read, and output.
 - Four decimal places.
 
@@ -78,7 +78,7 @@ The statutory-holiday table comes from the State Council notice published every 
 ## How it works
 
 - The host half registers the `llmCostTokens` session projection: it folds the whole durable log into per-route token buckets split by peak / off-peak, so the client gets an exact whole-session split regardless of Chat paging.
-- The client half contributes two read-only slots: `conversation.composer.dock` (session total) and `conversation.chat.turnTail` (turn total, from the Chat layer's `TurnTokenUsage`).
+- The client half contributes two read-only slots: `conversation.composer.dock` (session total) and `conversation.chat.assistant-actions` (turn total, attached to the finalized assistant message's action row so it sits beside the token-usage pill; the amount comes from the Chat layer's `TurnTokenUsage`).
 - No DSH core changes, no session writes, no model-request subscriptions.
 
 ## License
