@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 — 2026-10-18
+
+- 修复操作行内的「本轮 ¥x.xxxx」不显示：assistant 行的 Chat node kind 是 `assistant-step`，之前按 `assistant` 匹配导致查不到对应轮次而返回空。现在改为按消息 id（`finalNode.messageId`）匹配，不再依赖 kind 名称。
+- 位置、弹窗、金额口径不变。
+
 ## 0.1.1 — 2026-10-18
 
 - 本轮费用从「对话底部独立一行」移到**操作行内**（`conversation.chat.assistant-actions`），紧挨着「用量 xxx tok」，和 token 用量并排显示；不再额外占一行。

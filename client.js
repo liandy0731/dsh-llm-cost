@@ -257,8 +257,9 @@ window.__ModuleLoader__.load({
         return null;
       }
       for (const node of values) {
-        if (node?.kind !== 'assistant') continue;
-        if (node.data?.finalNode?.messageId === messageId) {
+        // Assistant rows are keyed 'assistant-step'; match on the durable message
+        // id instead of the renderer kind so a kind rename cannot blank the chip.
+        if (node?.data?.finalNode?.messageId === messageId) {
           turn = node.data.turn;
           break;
         }
