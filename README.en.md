@@ -13,10 +13,12 @@ All numbers are local estimates: **official model prices × token counts**, not 
 
 ## Install
 
-### From npm (once published)
+> This plugin is **not published to npm** — install it straight from GitHub.
+
+### Direct install (recommended)
 
 ```
-plugin_manager install_bundle target=dsh-llm-cost
+plugin_manager install_bundle target=github:liandy0731/dsh-llm-cost
 ```
 
 Refresh the page afterwards (the client half is loaded by the page).

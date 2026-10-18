@@ -13,12 +13,14 @@
 
 ## 安装
 
-### 从 npm（发布后）
+> 这个插件**没有发布到 npm**，请直接从 GitHub 安装。
 
-在 DSH 中让智能体安装，或直接使用插件管理器安装 `dsh-llm-cost`：
+### 直接装（推荐）
+
+在 DSH 中让智能体执行：
 
 ```
-plugin_manager install_bundle target=dsh-llm-cost
+plugin_manager install_bundle target=github:liandy0731/dsh-llm-cost
 ```
 
 安装后**刷新页面**（客户端半边由页面加载）。
