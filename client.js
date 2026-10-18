@@ -40,6 +40,8 @@ window.__ModuleLoader__.load({
       tag.dataset.pluginCss = CSS_ID;
       tag.textContent = [
         '.llmcost_root{min-width:0;display:inline-flex;align-self:center;flex:0 0 auto}',
+        '.llmcost_inline{order:1}',
+        '[data-turn-tail] [class*="_timeEnd"]{order:2}',
         '.llmcost_trigger{min-width:0;height:calc(28px + var(--dsh-content-font-delta,0px));padding:6px 8px;display:inline-flex;align-items:center;gap:4px;border:none;border-radius:28px;background:0 0;color:var(--dsw-alias-label-tertiary);font:inherit;font-size:var(--dsh-content-font-size-secondary,13px);line-height:calc(24px + var(--dsh-content-font-delta,0px));font-variant-numeric:tabular-nums;white-space:nowrap;cursor:pointer}',
         '.llmcost_trigger:hover,.llmcost_trigger[aria-expanded=true]{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary)}',
         '.llmcost_trigger:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}',
@@ -423,8 +425,8 @@ window.__ModuleLoader__.load({
 
     /* ---------- contributions ---------- */
 
-    function Chip({ rootRef, open, onToggle, mathLabel, amount, t }) {
-      return h('span', { ref: rootRef, className: 'llmcost_root' },
+    function Chip({ rootRef, open, onToggle, mathLabel, amount, t, inline }) {
+      return h('span', { ref: rootRef, className: inline === true ? 'llmcost_root llmcost_inline' : 'llmcost_root' },
         h('button', {
           type: 'button',
           className: 'llmcost_trigger',
@@ -492,6 +494,7 @@ window.__ModuleLoader__.load({
           mathLabel: 'chipTurn',
           amount: entry.total,
           t,
+          inline: true,
         }),
         open && (createPortal !== null ? createPortal(panel, document.body) : panel),
       );

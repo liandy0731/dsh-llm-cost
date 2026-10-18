@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3 — 2026-10-18
+
+- 位置调整：操作行内用 CSS `order` 把「本轮 ¥x.xxxx」排到「用量 xxx tok」之后、时间之前（DSH 的操作行固定为 复制 → 插件动作 → 分支 → 用量 → 时间，插件动作默认只能在分支之前）。若 DSH 后续改了时间元素的类名，会退化为排在时间之后，不影响显示。
+
 ## 0.1.2 — 2026-10-18
 
 - 修复操作行内的「本轮 ¥x.xxxx」不显示：assistant 行的 Chat node kind 是 `assistant-step`，之前按 `assistant` 匹配导致查不到对应轮次而返回空。现在改为按消息 id（`finalNode.messageId`）匹配，不再依赖 kind 名称。
